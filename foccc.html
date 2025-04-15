@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuyNow - Exclusive Products</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://sdmntprwestus.oaiusercontent.com/files/00000000-a820-5230-93ef-d685be920b01/raw?se=2025-04-04T18%3A34%3A37Z&sp=r&sv=2024-08-04&sr=b&scid=ce405fa1-0cdb-5a37-8593-61a43daf9232&skoid=fa7966e7-f8ea-483c-919a-13acfd61d696&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-04T09%3A06%3A26Z&ske=2025-04-05T09%3A06%3A26Z&sks=b&skv=2024-08-04&sig=ejABcOTkz1qIKwL54llZAEUQ9BsA3EM9/6Itgn0i5rU%3Dg">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            flex: 3;
+            max-width: 70%;
+            text-align: center;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .product {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .product img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .product-title {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .product-price {
+            color: #007bff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .cart-button, .buy-now-button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .cart-button {
+            background: #28a745;
+            color: white;
+        }
+
+        .buy-now-button {
+            background: #007bff;
+            color: white;
+        }
+
+        .cart-button:hover, .buy-now-button:hover {
+            background: #218838;
+        }
+
+        .cart-container {
+            flex: 1;
+            width: 30%;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left: 20px;
+        }
+
+        .cart-container h2 {
+            color: #d9534f;
+        }
+
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #28a745;
+        }
+
+        .delivery-info {
+            font-size: 12px;
+            color: grey;
+            margin-top: 5px;
+        }
+
+        .payment-options {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .payment-options button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .logo {
+            width: 150px; /* Adjust the size as needed */
+            margin-bottom: 10px;
+        }
+
+    </style>
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Website Logo -->
+        <img src="logo.png" alt="BuyNow Logo" class="logo"> <!-- Replace "logo.png" with the actual logo path -->
+
+        <h1 class="website-heading">BuyNow</h1>
+        <h2 class="sub-heading">Exclusive Products</h2>
+
+        <div class="products" id="productList"></div>
+    </div>
+
+    <div class="cart-container">
+        <h2>Shopping Cart</h2>
+        <ul id="cartItems"></ul>
+        <div class="total-amount">Total: $<span id="totalAmount">0.00</span></div>
+        <button class="buy-now-button" id="cartBuyNow" style="display: none;" onclick="buyCartNow()">Buy Now</button>
+
+        <div class="payment-options" id="paymentOptions">
+            <h3>Payment Options</h3>
+            <button onclick="processPayment('COD')">Cash on Delivery</button>
+            <button onclick="processPayment('Online')">Online Payment</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { title: "Sneakers", price: 49.99, img: "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/416e1d81-a6ed-4401-93d1-e5e26ea37a8d/AIR+FORCE+1+%2707.png" },
+            { title: "Running Shoes", price: 59.99, img: "https://assets.adidas.com/images/w_600,f_auto,q_auto/7a12c9d54fdc43dd9bbce249d0038b76_9366/Supernova_Stride_Running_Shoes_Blue_ID3692_HM1.jpg" }
+        ];
+
+        let cart = [];
+
+        function loadProducts() {
+            let productList = document.getElementById("productList");
+            productList.innerHTML = "";
+            products.forEach((product, index) => {
+                productList.innerHTML += `
+                    <div class="product">
+                        <img src="${product.img}" alt="${product.title}">
+                        <div class="product-title">${product.title}</div>
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <button class="cart-button" onclick="addToCart(${index})">Add to Cart</button>
+                        <button class="buy-now-button" onclick="buyNow(${index})">Buy Now</button>
+                        <div class="delivery-info">Expected Delivery: 3 days</div>
+                    </div>`;
+            });
+        }
+
+        function addToCart(index) {
+            cart.push(products[index]);
+            updateCart();
+            alert(products[index].title + " added to cart!");
+        }
+
+        function buyNow(index) {
+            cart = [products[index]];
+            updateCart();
+            document.getElementById('paymentOptions').style.display = 'block';
+        }
+
+        function buyCartNow(){
+            if(cart.length > 0){
+                document.getElementById('paymentOptions').style.display = 'block';
+            }
+        }
+
+        function processPayment(paymentType) {
+            alert(`Payment processed via ${paymentType}. Order placed!`);
+            cart = [];
+            updateCart();
+            document.getElementById('paymentOptions').style.display = 'none';
+        }
+
+        function updateCart() {
+            let cartItems = document.getElementById("cartItems");
+            let totalAmount = document.getElementById("totalAmount");
+            let cartBuyNow = document.getElementById("cartBuyNow");
+
+            cartItems.innerHTML = "";
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = "<li>Cart is empty</li>";
+                cartBuyNow.style.display = "none";
+            } else {
+                cart.forEach((item) => {
+                    cartItems.innerHTML += `<li>${item.title} - $${item.price.toFixed(2)}</li>`;
+                    total += item.price;
+                });
+                cartBuyNow.style.display = "block";
+            }
+
+            totalAmount.textContent = total.toFixed(2);
+        }
+
+        loadProducts();
+    </script>
+
+</body>
+</html>
